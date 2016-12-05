@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+    *{margin:0;padding:0;}
+    .cent{ width:950px; margin:0 auto;}
+    li{ list-style:none;}
+    </style>
+    <script src="http://apps.bdimg.com/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script src="jquery.storage.js"></script>
+<script>
+$(function(){
+
+        var $checkboxs = $('input:checkbox');
+        var $spans = $('span');
+        var $btn = $('#btn');
+        var $viwMian = $('#viwMian');
+
+        // 初始化 判断是否有存储过本地数据
+        StorageInit();
+        function StorageInit(){
+            fnStorage( function(){
+
+                if( $.storage('local','fruit') ){
+                    
+                    var fruitArr = $.storage('local','fruit').split("&");
+                    for( var j=0,len=fruitArr.length;j<len;j++ ){ 
+
+                        for( var i=0,len=$spans.length;i<len;i++ ){
+                            
+                            var spanVlue = $spans.eq(i).text();
+                            
+                            if( spanVlue == fruitArr[j] ){
+
+                                $spans.eq(i).prev().attr('checked','checked');
+                                
+                            }
+                        }
+                    }
+
+                }
+
+
+            } );
+        }
+
+        // 判断浏览器是否支持
+        function fnStorage( fn ){
+            if( $.isLocal ){
+
+                fn();
+
+            }    
+        }
+
+        //监控函数
+        function SyncFruit( e ){
+
+            if( e.key == 'fruit' ){
+                
+                for( var i=0,len=$spans.length;i<len;i++ ){
+                    $spans.eq(i).prev().attr('checked',false);
+                }
+                var newKey = e.newValue;
+                if( e.newValue ){
+                    
+                    var fruitArr = e.newValue.split("&");
+                    for( var j=0,len=fruitArr.length;j<len;j++ ){ 
+
+                        for( var i=0,len=$spans.length;i<len;i++ ){
+                            
+                            var spanVlue = $spans.eq(i).text();
+                            
+                            if( spanVlue == fruitArr[j] ){
+
+                                $spans.eq(i).prev().attr('checked','checked');
+                                
+                            }
+                        }
+                    }
+                }
+                
+            
+            }
+        }
+
+        //调用的删除
+        //$.removeStorage('local','clearAll');
+
+        //监控的调用
+        $.wachStorage( SyncFruit );
+        
+        //多选checkbox的点击事件
+        $checkboxs.on('click',function(){
+
+            var $this = $(this);
+            var value = $(this).next().text();
+
+            if( $this.attr('checked') == 'checked' ){
+                    
+                fnStorage(function(){
+
+                    if( $.storage('local','fruit') ){
+                        
+                        var fruitTxt = $.storage('local','fruit');
+                        fruitTxt += '&'+value;
+                        $.storage('local','fruit',fruitTxt);
+
+                    }else{
+
+                        $.storage('local','fruit',value);
+
+                    }
+
+                });
+
+            }else{
+                
+                fnStorage(function(){
+
+                    var fruitArr = $.storage('local','fruit').split("&");
+                    for( var i=0,len=fruitArr.length;i<len;i++ ){
+
+                        if( fruitArr[ i ] == value ){
+                            fruitArr.splice(i,1);
+                        }
+
+                    }
+                    var fruitTxt = fruitArr.join("&");
+
+                    $.storage('local','fruit',fruitTxt);
+
+                });
+
+                
+
+            }
+        });
+
+        // 确定的提交
+        $btn.on('click',function(){
+            
+
+            fnStorage(function(){
+
+                var html = '',
+                arr = []; 
+                $viwMian.html('');
+                if( $.storage('local','fruit') ){
+                    
+                    var fruitArr = $.storage('local','fruit').split("&");
+                    
+                    html += '我选择的有:<br/>'
+                    for( var j=0,len=fruitArr.length;j<len;j++ ){ 
+
+                        html+='<p>'+ fruitArr[j] +'</p>';
+                        
+                    }
+
+
+                     $viwMian.append(html);
+
+                }
+
+            });
+            
+        });
+        
+    
+});
+</script>
+    
+</head>
+<body>
+    <div class="cent">
+        <h2>
+            选出喜欢的水果(多选题)：
+        </h2>
+        <ul>
+            <li>
+                <input type="checkbox"><span>草莓</span>
+            </li>
+            <li>
+                <input type="checkbox"><span>苹果</span>
+            </li>
+            <li>
+                <input type="checkbox"><span>香蕉</span>
+            </li>
+            <li>
+                <input type="checkbox"><span>鸭梨</span>
+            </li>
+            <li>
+                <input type="checkbox"><span>桃子</span>
+            </li>
+            <li>
+                <input type="checkbox"><span>火龙果</span>
+            </li>
+        </ul>
+        <input type="button" value="确认" id="btn"><br/><br/>
+        <div id="viwMian">
+        
+        </div>
+    </div>
+    
+</body>
+</html>
